@@ -207,7 +207,7 @@ def create_reads_from_transcripts(
     logger.info("Creating reads from transcripts...")
 
     transcript_to_gene_mappings = \
-        gtf.get_transcript_to_gene_mappings(gtf_file, logger)
+        gtf.GtfInfo(gtf_file, logger).get_transcript_to_gene_mappings()
     gene_sequences = get_sequences_for_genes(
         fasta_file, read_length, insert_size, paired_end,
         transcript_to_gene_mappings, logger)
@@ -223,7 +223,7 @@ def count_reads_for_genes(
     logger.info("Counting reads for genes...")
 
     transcript_to_gene_mappings = \
-        gtf.get_transcript_to_gene_mappings(gtf_file, logger)
+        gtf.GtfInfo(gtf_file, logger).get_transcript_to_gene_mappings()
     gene_sequences = get_sequences_for_genes(
         fasta_file, read_length, insert_size, paired_end,
         transcript_to_gene_mappings, logger)

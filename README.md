@@ -3,6 +3,7 @@ transcript_utils
 
 A collection of simple scripts to perform various tasks for gene transcripts and their sequences:
 
+* get_gene_lengths: Calculate a couple of measures of gene "size". Given a GTF file as input, writes in CSV format the gene ID, maximum transcript length among isoforms of the gene, and gene "length" (the latter being defined as the number of bases contained in the union of all exons of all isoforms of the gene, including 3' and 5' UTRs).
 * transcripts_to_reads: Create all possible unique theoretical RNA-seq reads (i.e. with no errors) from a set of transcript sequences. Reads can be single- or paired-end (with a fixed insert size in the latter case). The script can also count, per-gene, the number of such reads mapped in a BAM file.
 
 Installation
@@ -29,6 +30,17 @@ pip install .
 ```
 
 in the top-level project directory.
+
+get_gene_lengths
+================
+
+Usage:
+
+```
+    get_gene_lengths [--log-level=<log-level>] <transcript-gtf-file>
+```
+
+Gene "size" information is written in CSV to standard out.
 
 transcripts_to_reads
 ====================

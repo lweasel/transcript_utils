@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import transcript_utils.get_gene_lengths as entry_point
+import sys
+
+entry_point.get_gene_lengths(sys.argv[1:])

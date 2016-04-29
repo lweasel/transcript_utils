@@ -21,6 +21,7 @@ setup(
         'six==1.10.0',
     ],
     scripts=[
+        'bin/get_gene_lengths',
         'bin/transcripts_to_reads',
     ]
 )
