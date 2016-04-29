@@ -1,10 +1,17 @@
 import pandas
 
+from . import feature
+
+SOURCE = "transcript_utils"
+MISSING_VALUE = "."
+
 
 class GtfRow(object):
+    SEQNAME_COL = 0
     FEATURE_COL = 2
     START_COL = 3
     END_COL = 4
+    STRAND_COL = 6
     ATTRIBUTES_COL = 8
 
     EXON_FEATURE = "exon"
@@ -12,13 +19,32 @@ class GtfRow(object):
     GENE_ID_ATTRIBUTE = "gene_id"
     TRANSCRIPT_ID_ATTRIBUTE = "transcript_id"
 
-    def __init__(self, row_data):
-        self.row_data = row_data
-
+    @classmethod
+    def from_file(cls, row_data):
         strip_quotes = lambda x: x.replace('"', '')
-        attr_str = self.row_data[GtfRow.ATTRIBUTES_COL]
-        self.attr_dict = {attr: strip_quotes(val) for attr, val in
-                          [av.split(" ", 1) for av in attr_str.split("; ")]}
+        attr_str = row_data[GtfRow.ATTRIBUTES_COL]
+        attr_dict = {attr: strip_quotes(val) for attr, val in
+                     [av.split(" ", 1) for av in attr_str.split("; ")]}
+
+        return GtfRow(row_data, attr_dict)
+
+    @classmethod
+    def from_values(cls, seqname, feature_type, start, end,
+                    strand, gene, transcript):
+
+        row_data = [seqname, SOURCE, feature_type, start, end,
+                    MISSING_VALUE, strand, MISSING_VALUE]
+        attr_dict = {GtfRow.GENE_ID_ATTRIBUTE: gene,
+                     GtfRow.TRANSCRIPT_ID_ATTRIBUTE: transcript}
+
+        return GtfRow(row_data, attr_dict)
+
+    def __init__(self, row_data, attr_dict):
+        self.row_data = row_data
+        self.attr_dict = attr_dict
+
+    def get_seqname(self):
+        return self.row_data[GtfRow.SEQNAME_COL]
 
     def get_feature(self):
         return self.row_data[GtfRow.FEATURE_COL]
@@ -29,6 +55,9 @@ class GtfRow(object):
     def get_end(self):
         return self.row_data[GtfRow.END_COL]
 
+    def get_strand(self):
+        return self.row_data[GtfRow.STRAND_COL]
+
     def get_gene(self):
         return self.attr_dict[GtfRow.GENE_ID_ATTRIBUTE]
 
@@ -37,6 +66,15 @@ class GtfRow(object):
 
     def is_exon(self):
         return self.get_feature() == GtfRow.EXON_FEATURE
+
+    def __str__(self):
+        fields = list(self.row_data)
+
+        attr_str = "; ".join(["{k} \"{v}\"".format(k=k, v=v)
+                            for k, v in self.attr_dict.iteritems()])
+        fields.append(attr_str)
+
+        return "\t".join([str(field) for field in fields])
 
 
 class GtfInfo(object):
@@ -48,13 +86,12 @@ class GtfInfo(object):
 
     def rows(self):
         for index, row in self.data.iterrows():
-            yield GtfRow(row)
+            yield GtfRow.from_file(row)
 
-    def get_transcript_to_gene_mappings(self):
-        self.logger.info(
-            "Getting transcript->gene mappings from " + self.gtf_file)
+    def get_transcript_info(self):
+        self.logger.info("Reading transcript info...")
 
-        transcript_to_gene_mappings = {}
+        transcript_info = {}
         lines_processed = 0
 
         for row in self.rows():
@@ -62,11 +99,22 @@ class GtfInfo(object):
             if lines_processed % 10000 == 0:
                 self.logger.debug("Processed {l} GTF lines.".format(l=lines_processed))
 
-            if row.get_feature() != "transcript":
+            if not row.is_exon():
                 continue
 
-            transcript = row.get_transcript()
-            if transcript not in transcript_to_gene_mappings:
-                transcript_to_gene_mappings[transcript] = row.get_gene()
+            gene_name = row.get_gene()
 
-        return transcript_to_gene_mappings
+            gene = None
+            if gene_name in transcript_info:
+                gene = transcript_info[gene_name]
+            else:
+                gene = feature.Gene(row)
+                transcript_info[gene_name] = gene
+
+            transcript = gene.add_transcript(row)
+            transcript.add_exon(row)
+
+        self.logger.info("...read transcript information for {g} genes".format(
+            g=len(transcript_info)))
+
+        return transcript_info

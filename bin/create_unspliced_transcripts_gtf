@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import transcript_utils.create_unspliced_transcripts_gtf as entry_point
+import sys
+
+entry_point.create_unspliced_transcripts_gtf(sys.argv[1:])

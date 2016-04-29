@@ -94,6 +94,17 @@ def validate_command_line_options(options):
         exit(exc.code)
 
 
+def _get_transcript_to_gene_mappings(gtf_file, logger):
+    transcript_info = gtf.GtfInfo(gtf_file, logger).get_transcript_info()
+
+    t_to_g_mappings = {}
+    for gene_name, gene in transcript_info.iteritems():
+        for transcript_name in gene.transcripts.keys():
+            t_to_g_mappings[transcript_name] = gene_name
+
+    return t_to_g_mappings
+
+
 def get_subsequence_generator(read_length, insert_size, paired_end):
     if paired_end:
         return subs.PairedEndSubsequences(read_length, insert_size)
@@ -207,7 +218,7 @@ def create_reads_from_transcripts(
     logger.info("Creating reads from transcripts...")
 
     transcript_to_gene_mappings = \
-        gtf.GtfInfo(gtf_file, logger).get_transcript_to_gene_mappings()
+        _get_transcript_to_gene_mappings(gtf_file, logger)
     gene_sequences = get_sequences_for_genes(
         fasta_file, read_length, insert_size, paired_end,
         transcript_to_gene_mappings, logger)
@@ -223,7 +234,7 @@ def count_reads_for_genes(
     logger.info("Counting reads for genes...")
 
     transcript_to_gene_mappings = \
-        gtf.GtfInfo(gtf_file, logger).get_transcript_to_gene_mappings()
+        _get_transcript_to_gene_mappings(gtf_file, logger)
     gene_sequences = get_sequences_for_genes(
         fasta_file, read_length, insert_size, paired_end,
         transcript_to_gene_mappings, logger)

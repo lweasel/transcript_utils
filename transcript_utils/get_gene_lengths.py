@@ -32,15 +32,6 @@ LOG_LEVEL_VALS = str(log.LOG_LEVELS.keys())
 TRANSCRIPT_GTF_FILE = "<transcript-gtf-file>"
 
 
-class Exon:
-    def __init__(self, start, end):
-        self.start = start
-        self.end = end
-
-    def length(self):
-        return self.end - self.start + 1
-
-
 def validate_command_line_options(options):
     try:
         opt.validate_dict_option(
@@ -51,40 +42,18 @@ def validate_command_line_options(options):
         exit(exc.code)
 
 
-def _get_transcript_info(gtf_file, logger):
-    logger.info("Reading transcript info...")
-
-    gtf_info = gtf.GtfInfo(gtf_file, logger)
-    transcript_info = defaultdict(lambda: defaultdict(list))
-
-    for row in gtf_info.rows():
-        if not row.is_exon():
-            continue
-
-        transcripts_for_gene = transcript_info[row.get_gene()]
-        exons_for_transcript = transcripts_for_gene[row.get_transcript()]
-        exons_for_transcript.append(Exon(row.get_start(), row.get_end()))
-
-    logger.info("...read transcript information for {g} genes".format(
-        g=len(transcript_info)))
-
-    return transcript_info
-
-
 def _calculate_gene_lengths(transcript_info, logger):
     logger.info("Calculating gene lengths...")
     gene_lengths = {}
 
-    for gene, transcripts_for_gene in transcript_info.iteritems():
+    for gene_name, gene in transcript_info.iteritems():
         gene_start = sys.maxint
         gene_end = -sys.maxint - 1
         exon_starts = defaultdict(list)
         exon_ends = defaultdict(list)
 
-        for transcript, exons_for_transcript in \
-                transcripts_for_gene.iteritems():
-
-            for exon in exons_for_transcript:
+        for transcript in gene.transcripts.values():
+            for exon in transcript.exons:
                 if exon.start < gene_start:
                     gene_start = exon.start
                 if exon.end > gene_end:
@@ -115,7 +84,7 @@ def _calculate_gene_lengths(transcript_info, logger):
 
             depth -= num_ends
 
-        gene_lengths[gene] = gene_length
+        gene_lengths[gene_name] = gene_length
 
         if len(gene_lengths) % 1000 == 0:
             logger.info("...processed {g} genes.".format(g=len(gene_lengths)))
@@ -127,23 +96,22 @@ def _calculate_max_transcript_lengths(transcript_info, logger):
     logger.info("Calculating maximum transcript lengths...")
     max_transcript_lengths = {}
 
-    for gene, transcripts_for_gene in transcript_info.iteritems():
+    for gene_name, gene in transcript_info.iteritems():
         max_transcript_length = 0
 
-        for transcript, exons_for_transcript in \
-                transcripts_for_gene.iteritems():
+        for transcript in gene.transcripts.values():
             transcript_length = 0
 
-            for exon in exons_for_transcript:
+            for exon in transcript.exons:
                 transcript_length += exon.length()
 
             logger.debug("Transcript {t} length {l}".format(
-                t=transcript, l=transcript_length))
+                t=transcript.name, l=transcript_length))
 
             if transcript_length > max_transcript_length:
                 max_transcript_length = transcript_length
 
-        max_transcript_lengths[gene] = max_transcript_length
+        max_transcript_lengths[gene_name] = max_transcript_length
 
         if len(max_transcript_lengths) % 1000 == 0:
             logger.info("...processed {g} genes.".format(
@@ -178,7 +146,8 @@ def get_gene_lengths(args):
 
     logger = log.get_logger(sys.stderr, options[LOG_LEVEL])
 
-    transcript_info = _get_transcript_info(options[TRANSCRIPT_GTF_FILE], logger)
+    gtf_info = gtf.GtfInfo(options[TRANSCRIPT_GTF_FILE], logger)
+    transcript_info = gtf_info.get_transcript_info()
     gene_lengths = _calculate_gene_lengths(transcript_info, logger)
     max_transcript_lengths = _calculate_max_transcript_lengths(
         transcript_info, logger)
