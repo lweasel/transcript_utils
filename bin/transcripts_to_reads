@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import transcript_utils.transcripts_to_reads as entry_point
+import sys
+
+entry_point.transcripts_to_reads(sys.argv[1:])
