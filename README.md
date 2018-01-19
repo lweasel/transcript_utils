@@ -1,4 +1,4 @@
-transcript_utils
+transcript-utils
 ================
 
 A collection of simple scripts to perform various tasks for gene transcripts and their sequences:
@@ -15,13 +15,13 @@ As these scripts have a number of dependencies on other Python packages, it is r
 After setting up ``virtualenv`` and ``virtualenvwrapper``, create and work in a virtual environment using the ``virtualenvwrapper`` tool:
 
 ```
-mkproject transcript_utils
+mkproject transcript-utils
 ```
 
-Install the *transcript_utils* package and its dependencies, into the virtual environment by running:
+Install the *transcript-utils* package and its dependencies, into the virtual environment by running:
 
 ```
-pip install git+https://github.com/sidbdri/transcript_utils.git
+pip install git+https://github.com/sidbdri/transcript-utils.git
 ```
 
 in the top-level project directory.
