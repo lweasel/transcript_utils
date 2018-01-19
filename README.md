@@ -18,16 +18,10 @@ After setting up ``virtualenv`` and ``virtualenvwrapper``, create and work in a 
 mkproject transcript_utils
 ```
 
-Clone the *transcript_utils* GitHub repository into this environment:
-
-```
-git clone https://github.com/lweasel/transcript_utils.git .
-```
-
 Install the *transcript_utils* package and its dependencies, into the virtual environment by running:
 
 ```
-pip install .
+pip install git+https://github.com/sidbdri/transcript_utils.git
 ```
 
 in the top-level project directory.
