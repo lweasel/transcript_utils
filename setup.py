@@ -12,7 +12,7 @@ setup(
     packages=['transcript_utils'],
     install_requires=[
         'docopt==0.6.2',
-        'numpy==1.13.1',
+        'numpy',
         'pandas==0.13.0',
         'pysam==0.8.2.1',
         'python-dateutil==2.4.2',
