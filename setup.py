@@ -17,7 +17,7 @@ setup(
         'pysam==0.8.2.1',
         'python-dateutil==2.4.2',
         'pytz==2016.3',
-        'schema==0.7.1',
+        'schema==0.3.1',
         'six==1.10.0',
     ],
     scripts=[
