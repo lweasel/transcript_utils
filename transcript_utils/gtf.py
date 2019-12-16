@@ -71,7 +71,8 @@ class GtfRow(object):
         fields = list(self.row_data)
 
         attr_str = "; ".join(["{k} \"{v}\"".format(k=k, v=v)
-                            for k, v in self.attr_dict.iteritems()])
+                            for k, v in iter(self.attr_dict.items())])
+
         fields.append(attr_str)
 
         return "\t".join([str(field) for field in fields])

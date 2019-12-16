@@ -98,7 +98,7 @@ def _get_transcript_to_gene_mappings(gtf_file, logger):
     transcript_info = gtf.GtfInfo(gtf_file, logger).get_transcript_info()
 
     t_to_g_mappings = {}
-    for gene_name, gene in transcript_info.iteritems():
+    for gene_name, gene in iter(transcript_info.items()):
         for transcript_name in gene.transcripts.keys():
             t_to_g_mappings[transcript_name] = gene_name
 
