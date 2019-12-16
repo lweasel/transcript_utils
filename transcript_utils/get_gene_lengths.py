@@ -46,9 +46,9 @@ def _calculate_gene_lengths(transcript_info, logger):
     logger.info("Calculating gene lengths...")
     gene_lengths = {}
 
-    for gene_name, gene in transcript_info.iteritems():
-        gene_start = sys.maxint
-        gene_end = -sys.maxint - 1
+    for gene_name, gene in iter(transcript_info.items()):
+        gene_start = sys.maxsize
+        gene_end = -sys.maxsize - 1
         exon_starts = defaultdict(list)
         exon_ends = defaultdict(list)
 
@@ -96,7 +96,7 @@ def _calculate_max_transcript_lengths(transcript_info, logger):
     logger.info("Calculating maximum transcript lengths...")
     max_transcript_lengths = {}
 
-    for gene_name, gene in transcript_info.iteritems():
+    for gene_name, gene in iter(transcript_info.items()):
         max_transcript_length = 0
 
         for transcript in gene.transcripts.values():

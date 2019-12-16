@@ -44,8 +44,8 @@ def _write_unspliced_gtf(transcript_info):
 
     for gene in transcript_info.values():
         for transcript in gene.transcripts.values():
-            transcript_start = sys.maxint
-            transcript_end = -sys.maxint - 1
+            transcript_start = sys.maxsize
+            transcript_end = -sys.maxsize - 1
 
             for exon in transcript.exons:
                 if exon.start < transcript_start:
